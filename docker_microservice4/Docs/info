@@ -1,0 +1,3 @@
+Build and Run
+Build: go build -o hello ../Source/main.go
+Run: ./hello

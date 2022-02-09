@@ -1,0 +1,67 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "version": "0.0.1"
+  },
+  "host": "localhost:5000",
+  "basePath": "/",
+  "paths": {
+    "/admin/company/": {
+      "post": {
+        "description": "Create a new company",
+        "tags": [
+          "admin"
+        ],
+        "operationId": "addCompany",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/CommonSuccess"
+          },
+          "401": {
+            "$ref": "#/responses/CommonError"
+          }
+        }
+      }
+    }
+  },
+  "responses": {
+    "CommonError": {
+      "description": "",
+      "headers": {
+        "message": {
+          "type": "string",
+          "description": "Message of the error\nin: string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Status of the error\nin: int64"
+        }
+      }
+    },
+    "CommonSuccess": {
+      "description": "",
+      "headers": {
+        "message": {
+          "type": "string",
+          "description": "Message of the error\nin: string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Status of the error\nin: int64"
+        }
+      }
+    }
+  }
+}

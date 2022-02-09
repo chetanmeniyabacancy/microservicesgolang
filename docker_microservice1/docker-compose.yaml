@@ -1,0 +1,106 @@
+version: '3'
+services:     
+  microservicestest.mysqldb:
+    image: mysql:8.0.28
+    container_name: microservicestest.mysqldb
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3310:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - golangmysqlnet
+  microservicestest.phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: microservicestest.pma
+    links:
+      - microservicestest.mysqldb
+    environment:
+      PMA_HOST: microservicestest.mysqldb
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8084:80
+    networks:
+      - golangmysqlnet
+  microservicestest.mongodb:
+    image: mongo:5.0.5
+    ports:
+      - 27016:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - golangmongonet
+  microservicestest.mongo-express:
+    image: mongo-express
+    container_name: microservicestest.mongo-express
+    links:
+      - microservicestest.mongodb
+    restart: always # fixes MongoNetworkError when mongodb is not ready when mongo-express starts
+    ports:
+      - 8086:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=microservicestest.mongodb
+    networks:
+      - golangmongonet
+  microservicestest.microservice_1:
+    build: ../docker_microservice1/.
+    restart: always # fixes MongoNetworkError when mongodb is not ready when mongo-express starts
+    ports:
+      - 8085:5000
+    networks:
+      - golangmongonet  
+      - golangmysqlnet
+  microservicestest.microservice_3:
+    build: ../docker_microservice3/.
+    restart: always # fixes MongoNetworkError when mongodb is not ready when mongo-express starts
+    ports:
+      - 8087:5002
+    networks:
+      - golangmongonet  
+      - golangmysqlnet
+  microservicestest.microservice_4:
+    build: ../docker_microservice4/.
+    restart: always # fixes MongoNetworkError when mongodb is not ready when mongo-express starts
+    ports:
+      - 8092:8092
+    networks:
+      - golangmongonet  
+      - golangmysqlnet   
+  microservicestest.microservice_5:
+    build: ../docker_microservice5/.
+    restart: always # fixes MongoNetworkError when mongodb is not ready when mongo-express starts
+    ports:
+      - 8095:8095
+    networks:
+      - golangmongonet  
+      - golangmysqlnet        
+  rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 8088:15672
+    volumes:
+        - rabbitmq-data:/var/lib/rabbitmq/
+    networks:
+        - golangmysqlnet
+        - golangmongonet
+volumes:
+  mongo-data:
+    driver: local
+  rabbitmq-data:
+    driver: local
+  dbdata:
+networks:
+  golangmysqlnet:
+    driver: bridge
+  golangmongonet:
+    driver: bridge

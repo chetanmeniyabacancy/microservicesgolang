@@ -1,0 +1,70 @@
+version: '3'
+services:     
+  microservicestest1.mysqldb:
+    image: mysql:8.0.28
+    container_name: microservicestest1.mysqldb
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3311:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - golangmysqlnet1
+  microservicestest1.phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: microservicestest1.pma
+    links:
+      - microservicestest1.mysqldb
+    environment:
+      PMA_HOST: microservicestest1.mysqldb
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8091:80
+    networks:
+      - golangmysqlnet1
+  microservicestest1.mongodb:
+    image: mongo:5.0.5
+    ports:
+      - 27015:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - golangmongonet1
+  microservicestest1.mongo-express:
+    image: mongo-express
+    container_name: microservicestest1.mongo-express
+    links:
+      - microservicestest1.mongodb
+    restart: always # fixes MongoNetworkError when mongodb is not ready when mongo-express starts
+    ports:
+      - 8092:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=microservicestest.mongodb
+    networks:
+      - golangmongonet1
+  microservicestest1.microservice_2:
+    image: docker_microservice_2:latest
+    restart: always # fixes MongoNetworkError when mongodb is not ready when mongo-express starts
+    ports:
+      - 8093:5000
+    networks:
+      - golangmongonet1
+      - golangmysqlnet1
+volumes:
+  mongo-data:
+    driver: local
+  dbdata:
+    driver: local
+networks:
+  golangmysqlnet1:
+    driver: bridge
+  golangmongonet1:
+    driver: bridge
